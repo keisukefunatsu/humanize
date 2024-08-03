@@ -3,7 +3,6 @@ import { AddressLike } from "ethers";
 
 interface MissionChecker {
   check(userAddress: string): Promise<boolean>;
-  isComplete(userAddress: string): Promise<boolean>;
 }
 
 const BLOCKSCOUT_CHAIN_SYMBOLS = {
@@ -26,12 +25,11 @@ export class TransactionMissionChecker implements MissionChecker {
       const txLength = response.data.result.length;
       if (
         response.data.status === "1" &&
-        txLength >=this.TRANSACTION_COUNT_THRESHOLD 
+        txLength >= this.TRANSACTION_COUNT_THRESHOLD
       ) {
-
-        console.log("txLength", txLength);  
+        console.log("txLength", txLength);
         // TODO: return signature of the mission attestation
-        // TODO: save signature status to database  
+        // TODO: save signature status to database
         return true;
       } else {
         throw new Error("Error fetching transactions from Blockscout");
@@ -40,8 +38,5 @@ export class TransactionMissionChecker implements MissionChecker {
       console.error("Error checking user transactions:", error);
       throw error;
     }
-  }
-  async isComplete(userAddress: string): Promise<boolean> {
-    return true;
   }
 }
