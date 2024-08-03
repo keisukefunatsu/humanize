@@ -23,15 +23,19 @@ export class TransactionMissionChecker implements MissionChecker {
     try {
       const response = await axios.get(url);
       const txLength = response.data.result.length;
+      const status = response.data.status;
       if (
-        response.data.status === "1" &&
+        status === "1" &&
         txLength >= this.TRANSACTION_COUNT_THRESHOLD
       ) {
         console.log("txLength", txLength);
         // TODO: return signature of the mission attestation
         // TODO: save signature status to database
         return true;
+      } else if (status === "0" || txLength === 0) {
+        return false;
       } else {
+        console.log(response.data);
         throw new Error("Error fetching transactions from Blockscout");
       }
     } catch (error) {
