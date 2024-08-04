@@ -1,9 +1,6 @@
+import axios from "axios";
 import { AddressLike } from "ethers";
-import { gql, GraphQLClient } from "graphql-request";
 
-export interface attestationSchema {
-    
-}
 export interface DecodedValue {
   name: string;
   type: string;
@@ -39,14 +36,8 @@ export interface GetAttestationsResponse {
   schema: Schema;
 }
 
-const graphQLClient = new GraphQLClient("https://sepolia.easscan.org/graphql", {
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
 // GraphQL query
-const GET_QUERY = gql`
+const GET_QUERY = `
   query GetAttestationsQuery(
     $where: AttestationWhereInput
     $schemaWhere2: SchemaWhereUniqueInput!
@@ -69,7 +60,7 @@ const GET_QUERY = gql`
   }
 `;
 
-// Function to fetch attestations
+// Function to fetch attestations using axios
 export const fetchAttestations = async ({
   walletAddress,
   contains,
@@ -78,7 +69,7 @@ export const fetchAttestations = async ({
   walletAddress: AddressLike;
   contains?: string;
   schema: string;
-}) => {
+}): Promise<GetAttestationsResponse> => {
   // Query variables
   const variables = {
     where: {
@@ -98,12 +89,17 @@ export const fetchAttestations = async ({
   };
 
   try {
-    const response = await graphQLClient.request<GetAttestationsResponse>(
-      GET_QUERY,
-      variables
-    );
-    console.log("Fetched Attestations:", response);
-    return response;
+    const response = await axios.post("https://sepolia.easscan.org/graphql", {
+      query: GET_QUERY,
+      variables: variables,
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("Fetched Attestations:", response.data.data);
+    return response.data.data as GetAttestationsResponse;
   } catch (error) {
     console.error("Error fetching attestations:", error);
     throw error;
