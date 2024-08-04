@@ -28,19 +28,19 @@ contract Attester {
     function attest(
         bytes32 schema,
         address _recipient,
-        string memory name,
-        address wallet
+        string memory first_name,
+        string memory last_name
     ) external returns (bytes32) {
         return
             _eas.attest(
                 AttestationRequest({
                     schema: schema,
                     data: AttestationRequestData({
-                        recipient: _recipient, // No recipient
+                        recipient: _recipient, 
                         expirationTime: NO_EXPIRATION_TIME, // No expiration time
-                        revocable: true,
+                        revocable: false,
                         refUID: EMPTY_UID, // No references UI
-                        data: abi.encode(name, wallet), // Encode a single uint256 as a parameter to the schema
+                        data: abi.encode(first_name, last_name), // Encode a single uint256 as a parameter to the schema
                         value: 0 // No value/ETH
                     })
                 })

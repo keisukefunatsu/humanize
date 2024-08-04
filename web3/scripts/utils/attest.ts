@@ -1,8 +1,8 @@
 import hre from 'hardhat'
-import {Attester} from '../typechain/contracts/Attester'
+import {Attester} from '../../typechain/contracts/Attester'
 
 async function main() {
-  const [user] = await hre.ethers.getSigners()
+  const [user, user2] = await hre.ethers.getSigners()
   const attesterContractAddress = process.env.ATTESTER_CONTRACT_ADDRESS
   if (!attesterContractAddress) {
     throw new Error('ATTESTER_CONTRACT_ADDRESS is not set')
@@ -10,11 +10,11 @@ async function main() {
   const attester: Attester = await hre.ethers.getContractAt(
     'Attester',
     attesterContractAddress,
-    user
+    user2
   )
-  const schema = process.env.TEST_SCHEMA_ID
+  const schema = process.env.SCHEMA_ID
   if (!schema) {
-    throw new Error('TEST_SCHEMA_ID is not set')
+    throw new Error('SCHEMA_ID is not set')
   }
   const name = 'transaction10 sepolia'
   const wallet = '0x33b926d2B21972464198b9c89B34fE9BA831Cb14'
