@@ -15,6 +15,7 @@ const BLOCKSCOUT_CHAIN_SYMBOLS = {
 export type BlockScoutChain = keyof typeof BLOCKSCOUT_CHAIN_SYMBOLS;
 
 export class TransactionMissionChecker implements MissionChecker {
+  private MISSION_ID = "1";
   private TRANSACTION_COUNT_THRESHOLD = 10;
   constructor(private chain: BlockScoutChain) {}
   async check(userAddress: AddressLike): Promise<boolean> {
