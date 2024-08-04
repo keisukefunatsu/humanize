@@ -1,11 +1,13 @@
-
 import { Hono } from "hono";
+import { env } from "hono/adapter";
 import { handle } from "hono/vercel";
-import { AddressLike } from "ethers";
+import { AddressLike, isAddress } from "ethers";
 import {
   BlockScoutChain,
+  GetERC721MissionChecker,
   TransactionMissionChecker,
 } from "../libs/missionChecker";
+import { MissionList } from "../libs/missionList";
 
 export const config = {
   runtime: "edge",
@@ -17,27 +19,49 @@ app.get("/", (c) => {
   return c.json({ message: "Hello Hono!" });
 });
 
-app.post("/missionCheck", async (c) => {
+app.get("/missions/:walletAddress", async (c) => {
+  const { SCHEMA_ID } = env<{ SCHEMA_ID: string }>(c);
+  const { walletAddress }: { walletAddress: AddressLike } = c.req.param();
+  if (!walletAddress || !isAddress(walletAddress)) {
+    c.status(400);
+    return c.json({ message: "walletAddress is required" });
+  }
+  const missionList = new MissionList();
+  const missions = await missionList.all(walletAddress, SCHEMA_ID);
+  return c.json(missions);
+});
 
+app.post("/missionCheck", async (c) => {
   try {
     const {
       address,
-    missionId,
-    chain,
-  }: { address: AddressLike; missionId: string; chain: BlockScoutChain } =
-    await c.req.json();
-  const client = new TransactionMissionChecker(chain);
-  const result = await client.check(address);
+      missionId,
+      chain,
+    }: { address: AddressLike; missionId: string; chain: BlockScoutChain } =
+      await c.req.json();
+    let client: any;
+    let result: boolean = false;
+    const { SCHEMA_ID } = env<{ SCHEMA_ID: string }>(c);
+    switch (missionId) {
+      case "1":
+        client = new TransactionMissionChecker(chain);
+        result = await client.check(address, SCHEMA_ID);
+        break;
+      case "2":
+        client = new GetERC721MissionChecker(chain);
+        result = await client.check(address, SCHEMA_ID);
+        break;
+    }
     c.status(200);
     return c.json(result);
   } catch (e) {
     c.status(500);
-    console.error(e); 
+    console.error(e);
     return c.json({ message: "Internal Server Error" });
   }
 });
 
 // for local testing
-export const server = app
+export const server = app;
 // for vercel
 export default handle(app);
