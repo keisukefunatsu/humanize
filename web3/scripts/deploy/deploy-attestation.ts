@@ -8,18 +8,6 @@ async function main() {
     throw new Error('EAS_CONTRACT_ADDRESS env variable is required')
   }
 
-  // For contract base attestation
-  // const AttesterFactory = await hre.ethers.getContractFactory("Attester");
-  // const attester = await AttesterFactory.deploy(easContractAddress);
-  // await attester.deployed();
-  // console.log("Attester deployed to:", attester.address);
-
-  // const attesterResolverFactory = await hre.ethers.getContractFactory("AttesterResolver");
-  // const attesterResolver = await attesterResolverFactory.deploy(easContractAddress, attester.address);
-  // await attesterResolver.deployed();
-  // console.log("AttesterResolver deployed to:", attesterResolver.address);
-
-
   // For authorized account attestation
   const attesterResolverFactory = await hre.ethers.getContractFactory("AttesterResolver");
   const attesterResolver = await attesterResolverFactory.deploy(easContractAddress, owner.address);
