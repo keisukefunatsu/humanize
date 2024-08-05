@@ -26,6 +26,9 @@ contract WorldIdVerifier {
     /// @dev Whether a nullifier hash has been used already. Used to guarantee an action is only performed once by a single person
     mapping(uint256 => bool) internal nullifierHashes;
 
+    /// @dev Mapping to store addresses that have been verified
+    mapping(address => bool) public verifiedAddress;
+
     /// @param nullifierHash The nullifier hash for the verified proof
     /// @dev A placeholder event that is emitted when a user successfully verifies with World ID
     event Verified(uint256 nullifierHash);
@@ -55,6 +58,9 @@ contract WorldIdVerifier {
         uint256 nullifierHash,
         uint256[8] calldata proof
     ) public {
+        // Ensure the caller is the same as the signal address
+        require(msg.sender == signal, "Sender and signal address do not match");
+
         // First, we make sure this person hasn't done this before
         if (nullifierHashes[nullifierHash])
             revert DuplicateNullifier(nullifierHash);
@@ -75,6 +81,16 @@ contract WorldIdVerifier {
         // Finally, execute your logic here, for example issue a token, NFT, etc...
         // Make sure to emit some kind of event afterwards!
 
+        // Record the address as verified
+        verifiedAddress[msg.sender] = true;
+
         emit Verified(nullifierHash);
+    }
+
+    /// @notice Function to get the verification status of an address
+    /// @param addr The address to check
+    /// @return True if the address is verified, false otherwise
+    function getVerifiedAddress(address addr) public view returns (bool) {
+        return verifiedAddress[addr];
     }
 }
