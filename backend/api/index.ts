@@ -8,6 +8,7 @@ import {
   TransactionMissionChecker,
 } from "../libs/missionChecker";
 import { MissionList } from "../libs/missionList";
+import { EASContractAddress, executeOnchainAttestation } from "../libs/missionAttester";
 
 export const config = {
   runtime: "edge",
@@ -19,16 +20,31 @@ app.get("/", (c) => {
   return c.json({ message: "Hello Hono!" });
 });
 
-app.get("/missions/:walletAddress", async (c) => {
-  const { SCHEMA_ID } = env<{ SCHEMA_ID: string }>(c);
-  const { walletAddress }: { walletAddress: AddressLike } = c.req.param();
-  if (!walletAddress || !isAddress(walletAddress)) {
-    c.status(400);
-    return c.json({ message: "walletAddress is required" });
+app.get("/missionAttester", async (c) => {
+  try {
+    await executeOnchainAttestation()
+    c.status(200);
+    return c.json(true);
+  } catch (e) {
+    c.status(500);
+    console.error(e);
+    return c.json({ message: "Internal Server Error" });
   }
-  const missionList = new MissionList();
-  const missions = await missionList.all(walletAddress, SCHEMA_ID);
-  return c.json(missions);
+});
+
+app.get("/missions/:walletAddress", async (c) => {
+  try {
+    const { walletAddress }: { walletAddress: AddressLike } = c.req.param();
+    if (!walletAddress || !isAddress(walletAddress)) {
+      c.status(400);
+      return c.json({ message: "walletAddress is required" });
+    }
+    const missionList = new MissionList();
+    const missions = await missionList.all(walletAddress);
+    return c.json(missions);
+  } catch (e) {
+    return c.json([])
+  }
 });
 
 app.post("/missionCheck", async (c) => {

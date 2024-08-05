@@ -6,6 +6,7 @@
     "deploy-prod": "vercel --prod"
   },
   "dependencies": {
+    "@ethereum-attestation-service/eas-sdk": "^2.5.0",
     "@hono/node-server": "^1.12.0",
     "@vercel/postgres": "^0.9.0",
     "axios": "^1.7.3",

@@ -21,14 +21,17 @@ export type BlockScoutChain = keyof typeof BLOCKSCOUT_CHAIN_SYMBOLS;
 // TODO: persist data in database
 export class MissionList {
   constructor() {}
-  async all(userAddress: AddressLike, schemaId: string): Promise<Mission[]> {
+  async all(userAddress: AddressLike): Promise<Mission[]> {
+    const SCHEMA_ID = process.env.SCHEMA_ID || "";
+    if (!SCHEMA_ID) {
+      throw new Error("SCHEMA_ID is not set");
+    }
     const attestationData = await fetchAttestations({
       walletAddress: userAddress,
-      schema: schemaId,
+      schema: SCHEMA_ID,
     });
     if (!attestationData.schema) {
-      console.log("schema not found");
-      return []
+      throw new Error("schema not found");
     }
 
     const missions = [
@@ -74,17 +77,14 @@ export class MissionList {
     attestations.forEach((attestation) => {
       const decodeData = JSON.parse(
         attestation.decodedDataJson
-      ) as DecodedDataItem[]
+      ) as DecodedDataItem[];
       const decoded = decodeData.reduce((accm, item) => {
-        return {...accm, [item.value.name]: item.value.value}
-      }, {}) 
-          const mission = missions.find(
-            (mission) => mission.id === decoded.name
-          );
-          if (mission) {
-            mission.completed = true;
-          }
-      
+        return { ...accm, [item.value.name]: item.value.value };
+      }, {}) as { name: string; wallet: string };
+      const mission = missions.find((mission) => mission.id === decoded.name);
+      if (mission) {
+        mission.completed = true;
+      }
     });
 
     return missions;
