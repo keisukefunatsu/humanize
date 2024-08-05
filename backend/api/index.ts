@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from 'hono/cors'
 import { env } from "hono/adapter";
 import { handle } from "hono/vercel";
 import { AddressLike, isAddress } from "ethers";
@@ -8,13 +9,19 @@ import {
   TransactionMissionChecker,
 } from "../libs/missionChecker";
 import { MissionList } from "../libs/missionList";
-import { EASContractAddress, executeOnchainAttestation } from "../libs/missionAttester";
+import { executeOnchainAttestation } from "../libs/missionAttester";
 
 export const config = {
   runtime: "edge",
 };
 
 const app = new Hono().basePath("/api");
+app.use(
+  '*',
+  cors({
+    origin: '*',
+  })
+)
 
 app.get("/", (c) => {
   return c.json({ message: "Hello Hono!" });
@@ -22,7 +29,7 @@ app.get("/", (c) => {
 
 app.get("/missionAttester", async (c) => {
   try {
-    await executeOnchainAttestation()
+    await executeOnchainAttestation();
     c.status(200);
     return c.json(true);
   } catch (e) {
@@ -43,7 +50,8 @@ app.get("/missions/:walletAddress", async (c) => {
     const missions = await missionList.all(walletAddress);
     return c.json(missions);
   } catch (e) {
-    return c.json([])
+    console.error(e);
+    return c.json([]);
   }
 });
 

@@ -89,7 +89,7 @@ export const fetchAttestations = async ({
   };
 
   try {
-    const response = await axios.post("https://sepolia.easscan.org/graphql", {
+    const response = await axios.post("https://optimism.easscan.org/graphql", {
       query: GET_QUERY,
       variables: variables,
     }, {

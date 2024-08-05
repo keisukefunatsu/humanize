@@ -36,35 +36,35 @@ export const executeOnchainAttestation = async () => {
   ]);
 
   const schemaUID =
-    "0xe081c449929a6bda505b8af491863bba79dad7d0de5cae46e55be7705f8f4135";
+    "0xacb3801c02aac77e3b02b29afc6754f889ee8bb5eb992b4d0802146cba71d2d8";
 
-    // const tx = await eas.attest({
-    //   schema: schemaUID,
-    //   data: {
-    //     recipient: "0x33b926d2B21972464198b9c89B34fE9BA831Cb14",
-    //     expirationTime: BigInt(0),
-    //     revocable: true, // Be aware that if your schema is not revocable, this MUST be false
-    //     data: encodedData,
-    //   },
-    // });
-
-    // const newAttestationUID = await tx.wait();
-    // console.log("New attestation UID:", newAttestationUID);
-
-  const delegated = await eas.getDelegated();
-  const response = await delegated.signDelegatedAttestation(
-    {
+    const tx = await eas.attest({
       schema: schemaUID,
-      recipient: "0x33b926d2B21972464198b9c89B34fE9BA831Cb14",
-      expirationTime: 0n, // Unix timestamp of when attestation expires (0 for no expiration)
-      revocable: true,
-      refUID:
-        "0x0000000000000000000000000000000000000000000000000000000000000000",
-      data: encodedData,
-      deadline: 0n, // Unix timestamp of when signature expires (0 for no expiration)
-      value: 0n,
-    },
-    signer
-  );
-  console.log(response)
+      data: {
+        recipient: "0x33b926d2B21972464198b9c89B34fE9BA831Cb14",
+        expirationTime: BigInt(0),
+        revocable: true, // Be aware that if your schema is not revocable, this MUST be false
+        data: encodedData,
+      },
+    });
+
+    const newAttestationUID = await tx.wait();
+    console.log("New attestation UID:", newAttestationUID);
+
+//   const delegated = await eas.getDelegated();
+//   const response = await delegated.signDelegatedAttestation(
+//     {
+//       schema: schemaUID,
+//       recipient: "0x33b926d2B21972464198b9c89B34fE9BA831Cb14",
+//       expirationTime: 0n, // Unix timestamp of when attestation expires (0 for no expiration)
+//       revocable: true,
+//       refUID:
+//         "0x0000000000000000000000000000000000000000000000000000000000000000",
+//       data: encodedData,
+//       deadline: 0n, // Unix timestamp of when signature expires (0 for no expiration)
+//       value: 0n,
+//     },
+//     signer
+//   );
+//   console.log(response)
 };

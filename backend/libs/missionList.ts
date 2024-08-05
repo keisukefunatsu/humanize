@@ -26,13 +26,6 @@ export class MissionList {
     if (!SCHEMA_ID) {
       throw new Error("SCHEMA_ID is not set");
     }
-    const attestationData = await fetchAttestations({
-      walletAddress: userAddress,
-      schema: SCHEMA_ID,
-    });
-    if (!attestationData.schema) {
-      throw new Error("schema not found");
-    }
 
     const missions = [
       {
@@ -71,6 +64,14 @@ export class MissionList {
         completed: false,
       },
     ];
+
+    const attestationData = await fetchAttestations({
+      walletAddress: userAddress,
+      schema: SCHEMA_ID,
+    });
+    if (!attestationData.schema) {
+      throw new Error("schema not found");
+    }
 
     const attestations = attestationData.attestations;
 
