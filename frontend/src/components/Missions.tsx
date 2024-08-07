@@ -4,26 +4,26 @@ import { EAS } from "@ethereum-attestation-service/eas-sdk";
 import { JsonRpcSigner } from "ethers";
 
 type Signature = {
-    r: string;
-    s: string;
-    v: number;
-  };
+  r: string;
+  s: string;
+  v: number;
+};
 type AttestationMessage = {
-    message: {
-        attester: string;
-        data: string;
-        expirationTime: string;
-        nonce: string;
-        recipient: string;
-        refUID: string;
-        revocable: boolean;
-        schema: string;
-    }
-    signature: Signature;
+  message: {
+    attester: string;
+    data: string;
+    expirationTime: string;
+    nonce: string;
+    recipient: string;
+    refUID: string;
+    revocable: boolean;
+    schema: string;
   };
+  signature: Signature;
+};
 
 function Missions({ signer }: { signer: JsonRpcSigner }) {
-  const { data: missions, isLoading, error } = useGetMissions(signer.address);
+  const { data: missions, isLoading, error, refetch } = useGetMissions(signer.address);
   const EASContractAddress = process.env.REACT_APP_EAS_CONTRACT_ADDRESS || "";
   if (!EASContractAddress) {
     throw new Error("EASContractAddress is not set");
@@ -41,29 +41,33 @@ function Missions({ signer }: { signer: JsonRpcSigner }) {
         chain,
         missionId,
       });
-      const {message, signature} = response.data as AttestationMessage;
-      
+      const { message, signature } = response.data as AttestationMessage;
+      console.log("message", message);
+      console.log("signature", signature);
       const transaction = await eas.attestByDelegation({
         schema: message.schema,
         data: {
           recipient: message.recipient,
-          expirationTime: BigInt(message.expirationTime), // Unix timestamp of when attestation expires (0 for no expiration),
+          expirationTime: message.expirationTime
+            ? BigInt(message.expirationTime)
+            : BigInt(0), // Unix timestamp of when attestation expires (0 for no expiration),
           revocable: message.revocable,
           refUID: message.refUID,
-          data: message.data
+          data: message.data,
         },
         signature: signature,
         attester: message.attester,
-        deadline: BigInt(0) // Unix timestamp of when signature expires (0 for no expiration)
+        deadline: BigInt(0), // Unix timestamp of when signature expires (0 for no expiration)
       });
-      const receipt = await transaction.wait()
+      const receipt = await transaction.wait();
+      refetch();
       console.log(receipt);
+
       return transaction; // Return the data received from the API
     } catch (error) {
       console.error("Error posting mission data:", error);
+      
     }
-
-    
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -87,14 +91,24 @@ function Missions({ signer }: { signer: JsonRpcSigner }) {
                       {mission.name}
                     </h3>
                     <p className="mt-3 text-gray-500">{mission.description}</p>
+                    <a
+                      className="text-blue-500"
+                      href={
+                        mission.uid
+                          ? `https://optimism.easscan.org/attestation/view/${mission.uid}`
+                          : ""
+                      }
+                    >
+                      {mission.uid ? "View Attestation" : ""}
+                    </a>
                   </div>
                   <div className="mt-auto flex border-t border-gray-200 divide-x divide-gray-200">
                     <button
                       className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-es-xl rounded-ee-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
                       disabled={!mission.isActive || mission.completed}
-                        onClick={() =>
-                          getAttestationSignature("optimism", mission.id)
-                        }
+                      onClick={() =>
+                        getAttestationSignature("optimism", mission.id)
+                      }
                     >
                       {!mission.completed
                         ? "Check condition &  Claim"

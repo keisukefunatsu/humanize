@@ -7,6 +7,7 @@ export interface Mission {
   description: string;
   isActive: boolean;
   completed: boolean;
+  uid?: string;
 }
 
 const fetchMissions = async (walletAddress: string): Promise<Mission[]> => {
