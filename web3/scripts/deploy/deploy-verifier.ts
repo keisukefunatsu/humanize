@@ -15,6 +15,12 @@ async function main() {
     throw new Error("WORLD_APP_ACTION_ID is required");
   }
   const [owner] = await hre.ethers.getSigners();
+
+  console.log('deploying WorldIdVerifier...')
+  console.log('WORLD_ID_ROUTER_ADDRESS', WORLD_ID_ROUTER_ADDRESS);
+  console.log('WORLD_APP_ID', WORLD_APP_ID);
+  console.log('WORLD_APP_ACTION_ID', WORLD_APP_ACTION_ID);
+
   const WorldIdVerifier = await hre.ethers.getContractFactory("WorldIdVerifier");
   const worldIdVerifier = await WorldIdVerifier.deploy(
     WORLD_ID_ROUTER_ADDRESS,
@@ -22,9 +28,7 @@ async function main() {
     WORLD_APP_ACTION_ID
   );
   await worldIdVerifier.deployed();
-  console.log('WORLD_ID_ROUTER_ADDRESS', WORLD_ID_ROUTER_ADDRESS);
-  console.log('WORLD_APP_ID', WORLD_APP_ID);
-  console.log('WORLD_APP_ACTION_ID', WORLD_APP_ACTION_ID);
+
   console.log("WorldIdVerifier deployed to:", worldIdVerifier.address);
 }
 
