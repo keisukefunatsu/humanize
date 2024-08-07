@@ -17,8 +17,8 @@ const BLOCKSCOUT_CHAIN_SYMBOLS = {
 export type BlockScoutChain = keyof typeof BLOCKSCOUT_CHAIN_SYMBOLS;
 
 export class TransactionMissionChecker implements MissionChecker {
-  private MISSION_ID = "transaction10";
-  private TRANSACTION_COUNT_THRESHOLD = 10;
+  private MISSION_ID = "transaction5";
+  private TRANSACTION_COUNT_THRESHOLD = 5;
   constructor(private chain: BlockScoutChain) {}
   async check(userAddress: AddressLike, schemaId: string): Promise<boolean> {
     const attestationData = await fetchAttestations({
@@ -40,8 +40,7 @@ export class TransactionMissionChecker implements MissionChecker {
     const chainSymbol = BLOCKSCOUT_CHAIN_SYMBOLS[this.chain];
     const url = `https://${chainSymbol}.blockscout.com/api?module=account&action=txlist&address=${userAddress}`;
     const response = await axios.get(url);
-    console.log(url);
-    console.log(response.data);
+    
     if (!response.data.result) {
       throw new Error("Error fetching transactions from Blockscout");
     }
@@ -64,7 +63,7 @@ export class TransactionMissionChecker implements MissionChecker {
 
 export class GetERC721MissionChecker implements MissionChecker {
   private MISSION_ID = "2";
-  private TRANSACTION_THRESHOLD = 10;
+  private TRANSACTION_THRESHOLD = 1;
   constructor(private chain: BlockScoutChain) {}
   async check(userAddress: AddressLike): Promise<boolean> {
     return true;

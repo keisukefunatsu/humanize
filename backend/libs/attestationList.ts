@@ -17,6 +17,7 @@ export interface DecodedDataItem {
 export interface Attestation {
   attester: string;
   decodedDataJson: string;
+  id: string;
   txid: string;
   schemaId: string;
   recipient: string;
@@ -45,6 +46,7 @@ const GET_QUERY = `
     attestations(where: $where) {
       attester
       decodedDataJson
+      id
       txid
       schemaId
       recipient

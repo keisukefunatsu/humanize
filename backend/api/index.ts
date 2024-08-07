@@ -60,13 +60,22 @@ app.post("/missionCheck", async (c) => {
     }
     const { SCHEMA_ID } = env<{ SCHEMA_ID: string }>(c);
     switch (missionId) {
-      case "transaction10":
+      case "transaction5":
         client = new TransactionMissionChecker(chain);
         result = await client.check(walletAddress, SCHEMA_ID);
         break;
       case "getErc721":
         client = new GetERC721MissionChecker(chain);
         result = await client.check(walletAddress, SCHEMA_ID);
+        break;
+      case "uniswapFirstSwap":
+        result = true;
+        break;
+      case "governanceContributor":
+        result = true;
+        break;
+      case "chainEcosystemContributor":
+        result = true;
         break;
       default:
         return c.json({ message: "Invalid missionId" });
@@ -79,7 +88,7 @@ app.post("/missionCheck", async (c) => {
     if (!verified) {
       return c.json({ message: "Not verified" });
     }
-    const signature = await getDelegatedAttestation({ walletAddress, missionId });
+    const signature = await getDelegatedAttestation({ walletAddress, missionId, chain });
     c.status(200);
     return c.json(signature);
   } catch (e) {

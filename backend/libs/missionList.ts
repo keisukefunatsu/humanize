@@ -7,6 +7,7 @@ interface Mission {
   description: string;
   isActive: boolean;
   completed: boolean;
+  uid?: string;
 }
 
 const BLOCKSCOUT_CHAIN_SYMBOLS = {
@@ -27,40 +28,40 @@ export class MissionList {
       throw new Error("SCHEMA_ID is not set");
     }
 
-    const missions = [
+    const missions: Mission[] = [
       {
-        id: "transaction10",
-        name: "Complete 10 Transactions",
-        description: "Complete 10 transactions",
+        id: "transaction5",
+        name: "Complete 5 Transactions",
+        description: "Complete 5 transactions",
         isActive: true,
         completed: false,
       },
       {
         id: "getErc721",
-        name: "Get ERC721 NFT",
+        name: "Get ERC721 NFT(Dummy, anyone can attest)",
         description: "Transfer at least 1 ERC721 NFT(Mint or Transfer)",
         isActive: true,
         completed: false,
       },
       {
         id: "uniswapFirstSwap",
-        name: "First Swap at Uniswap",
+        name: "First Swap at Uniswap(Dummy, anyone can attest)",
         description: "Swap at least 1 token at Uniswap",
-        isActive: false,
+        isActive: true,
         completed: false,
       },
       {
         id: "governanceContributor",
-        name: "Governance Contributor",
+        name: "Governance Contributor(Dummy)",
         description: "Vote at least 1 proposal on network governance",
-        isActive: false,
+        isActive: true,
         completed: false,
       },
       {
         id: "chainEcosystemContributor",
-        name: "Chain EcosystemContributor",
+        name: "Chain EcosystemContributor(Dummy, anyone can attest)",
         description: "At least 1 Github PR merged on Chain Ecosystem",
-        isActive: false,
+        isActive: true,
         completed: false,
       },
     ];
@@ -81,10 +82,14 @@ export class MissionList {
       ) as DecodedDataItem[];
       const decoded = decodeData.reduce((accm, item) => {
         return { ...accm, [item.value.name]: item.value.value };
-      }, {}) as { name: string; wallet: string };
-      const mission = missions.find((mission) => mission.id === decoded.name);
+      }, {}) as { missionId: string; chainId: string };
+      console.log(decoded);
+      const mission = missions.find(
+        (mission) => mission.id === decoded.missionId
+      );
       if (mission) {
         mission.completed = true;
+        mission.uid = attestation.id;
       }
     });
 

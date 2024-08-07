@@ -20,7 +20,7 @@ const signer = wallet.connect(provider);
 
 
 const EASContractAddress = process.env.EAS_CONTRACT_ADDRESS || "";
-export const getDelegatedAttestation = async ({walletAddress, missionId}: {walletAddress: AddressLike, missionId: string}) => {
+export const getDelegatedAttestation = async ({walletAddress, missionId, chain}: {walletAddress: AddressLike, missionId: string, chain: string}) => {
   const eas = new EAS(EASContractAddress);
   eas.connect(signer);
   // Initialize SchemaEncoder with the schema string
@@ -31,8 +31,8 @@ export const getDelegatedAttestation = async ({walletAddress, missionId}: {walle
     { name: "missionId", value: missionId, type: "string" },
     {
       name: "chainId",
-      value: walletAddress.toString(),
-      type: "address",
+      value: chain,
+      type: "string",
     },
   ]);
 
