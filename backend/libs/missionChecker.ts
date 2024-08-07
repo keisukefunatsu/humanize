@@ -14,7 +14,6 @@ const BLOCKSCOUT_CHAIN_SYMBOLS = {
   zksync: "zksync",
   sepolia: "eth-sepolia",
 };
-
 export type BlockScoutChain = keyof typeof BLOCKSCOUT_CHAIN_SYMBOLS;
 
 export class TransactionMissionChecker implements MissionChecker {
@@ -41,6 +40,11 @@ export class TransactionMissionChecker implements MissionChecker {
     const chainSymbol = BLOCKSCOUT_CHAIN_SYMBOLS[this.chain];
     const url = `https://${chainSymbol}.blockscout.com/api?module=account&action=txlist&address=${userAddress}`;
     const response = await axios.get(url);
+    console.log(url);
+    console.log(response.data);
+    if (!response.data.result) {
+      throw new Error("Error fetching transactions from Blockscout");
+    }
     const txLength = response.data.result.length;
     const status = response.data.status;
     if (status === "1" && txLength >= this.TRANSACTION_COUNT_THRESHOLD) {

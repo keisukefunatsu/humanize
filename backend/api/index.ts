@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { cors } from 'hono/cors'
+import { cors } from "hono/cors";
 import { env } from "hono/adapter";
 import { handle } from "hono/vercel";
 import { AddressLike, isAddress } from "ethers";
@@ -9,7 +9,8 @@ import {
   TransactionMissionChecker,
 } from "../libs/missionChecker";
 import { MissionList } from "../libs/missionList";
-import { executeOnchainAttestation } from "../libs/missionAttester";
+import { getDelegatedAttestation } from "../libs/missionAttester";
+import { checkWorldIdVerified } from "../libs/checkWorldIdVerified";
 
 export const config = {
   runtime: "edge",
@@ -17,26 +18,14 @@ export const config = {
 
 const app = new Hono().basePath("/api");
 app.use(
-  '*',
+  "*",
   cors({
-    origin: '*',
+    origin: "*",
   })
-)
+);
 
 app.get("/", (c) => {
   return c.json({ message: "Hello Hono!" });
-});
-
-app.get("/missionAttester", async (c) => {
-  try {
-    await executeOnchainAttestation();
-    c.status(200);
-    return c.json(true);
-  } catch (e) {
-    c.status(500);
-    console.error(e);
-    return c.json({ message: "Internal Server Error" });
-  }
 });
 
 app.get("/missions/:walletAddress", async (c) => {
@@ -58,26 +47,41 @@ app.get("/missions/:walletAddress", async (c) => {
 app.post("/missionCheck", async (c) => {
   try {
     const {
-      address,
+      walletAddress,
       missionId,
       chain,
-    }: { address: AddressLike; missionId: string; chain: BlockScoutChain } =
+    }: { walletAddress: AddressLike; missionId: string; chain: BlockScoutChain } =
       await c.req.json();
     let client: any;
     let result: boolean = false;
+    if (!walletAddress || !isAddress(walletAddress)) {
+      c.status(400);
+      return c.json({ message: "walletAddress is required" });
+    }
     const { SCHEMA_ID } = env<{ SCHEMA_ID: string }>(c);
     switch (missionId) {
-      case "1":
+      case "transaction10":
         client = new TransactionMissionChecker(chain);
-        result = await client.check(address, SCHEMA_ID);
+        result = await client.check(walletAddress, SCHEMA_ID);
         break;
-      case "2":
+      case "getErc721":
         client = new GetERC721MissionChecker(chain);
-        result = await client.check(address, SCHEMA_ID);
+        result = await client.check(walletAddress, SCHEMA_ID);
         break;
+      default:
+        return c.json({ message: "Invalid missionId" });
     }
+
+    if (!result) {
+      return c.json({ message: "Not eligible" });
+    }
+    const verified = await checkWorldIdVerified(walletAddress);
+    if (!verified) {
+      return c.json({ message: "Not verified" });
+    }
+    const signature = await getDelegatedAttestation({ walletAddress, missionId });
     c.status(200);
-    return c.json(result);
+    return c.json(signature);
   } catch (e) {
     c.status(500);
     console.error(e);

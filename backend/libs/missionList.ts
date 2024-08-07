@@ -30,7 +30,7 @@ export class MissionList {
     const missions = [
       {
         id: "transaction10",
-        name: "Transaction 10",
+        name: "Complete 10 Transactions",
         description: "Complete 10 transactions",
         isActive: true,
         completed: false,
