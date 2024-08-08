@@ -104,7 +104,7 @@ export function SignInWithWorldID({
               ? "World ID Verified"
               : proof
               ? "Verify Onchain"
-              : "Verify with World ID"}
+              : "Verify Human with World ID"}
           </div>
         </button>
       )}

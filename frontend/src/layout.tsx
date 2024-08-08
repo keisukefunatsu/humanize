@@ -45,7 +45,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex flex-col h-full md:h-auto">
             <nav className="flex flex-col p-4 space-y-2">
               <button
-                className="flex items-center text-gray-700 hover:bg-gray-100 p-2 rounded"
+                className="bg-gray-100 flex items-center text-gray-700 hover:bg-gray-100 p-2 rounded"
               >
                 <span className="mr-2 w-6 h-6 bg-gray-300 rounded-full">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25">
