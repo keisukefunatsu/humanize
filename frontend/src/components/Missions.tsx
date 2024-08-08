@@ -144,6 +144,11 @@ function Missions({ signer, chain }: { signer: JsonRpcSigner; chain: string }) {
         />
       )}
       <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+        <div className="text-center mb-6">
+          <span className="inline-block bg-blue-100 text-blue-800 text-lg font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
+            Active Chain: {chain}
+          </span>
+        </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {missions?.map((mission) => (
             <div
