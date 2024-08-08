@@ -38,28 +38,29 @@ export class MissionList {
       },
       {
         id: "getErc721",
-        name: "Get ERC721 NFT(Dummy, anyone can attest)",
+        name: "Get ERC721 NFT",
         description: "Transfer at least 1 ERC721 NFT(Mint or Transfer)",
         isActive: true,
         completed: false,
       },
       {
         id: "uniswapFirstSwap",
-        name: "First Swap at Uniswap(Dummy, anyone can attest)",
+        name: "First Swap at Uniswap(Currently Free)",
         description: "Swap at least 1 token at Uniswap",
         isActive: true,
         completed: false,
       },
       {
+        // id: "governanceContributor",
         id: "governanceContributor",
-        name: "Governance Contributor(Dummy)",
+        name: "Governance Contributor(Currently Free)",
         description: "Vote at least 1 proposal on network governance",
         isActive: true,
         completed: false,
       },
       {
         id: "chainEcosystemContributor",
-        name: "Chain EcosystemContributor(Dummy, anyone can attest)",
+        name: "Chain EcosystemContributor(Currently Free)",
         description: "At least 1 Github PR merged on Chain Ecosystem",
         isActive: true,
         completed: false,
@@ -83,7 +84,7 @@ export class MissionList {
       const decoded = decodeData.reduce((accm, item) => {
         return { ...accm, [item.value.name]: item.value.value };
       }, {}) as { missionId: string; chainId: string };
-      console.log(decoded);
+      console.log("completed", decoded);
       const mission = missions.find(
         (mission) => mission.id === decoded.missionId
       );
