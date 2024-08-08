@@ -1,13 +1,12 @@
-// Missions.tsx
-import React, { useState } from 'react';
-import axios from 'axios';
-import useGetMissions from '../hooks/useGetMissions';
-import { EAS } from '@ethereum-attestation-service/eas-sdk';
-import { JsonRpcSigner } from 'ethers';
-import { useContractRead } from 'wagmi';
-import { WORLD_VERIFIER_ADDRESS } from '../constants';
-import { WorldIdVerifier__factory } from '../typechain';
-import ModalComponent from './Modal';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import useGetMissions from "../hooks/useGetMissions";
+import { EAS } from "@ethereum-attestation-service/eas-sdk";
+import { JsonRpcSigner } from "ethers";
+import { useContractRead } from "wagmi";
+import { WORLD_VERIFIER_ADDRESS } from "../constants";
+import { WorldIdVerifier__factory } from "../typechain";
+import ModalComponent from "./Modal";
 
 type Signature = {
   r: string;
@@ -29,10 +28,10 @@ type AttestationMessage = {
   signature: Signature;
 };
 
-function Missions({ signer }: { signer: JsonRpcSigner }) {
+function Missions({ signer, chain }: { signer: JsonRpcSigner; chain: string }) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
-  const [modalMessage, setModalMessage] = useState('');
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
   const [isAttesting, setIsAttesting] = useState(false);
 
   const {
@@ -40,29 +39,33 @@ function Missions({ signer }: { signer: JsonRpcSigner }) {
     isLoading,
     error,
     refetch,
-  } = useGetMissions(signer.address);
+  } = useGetMissions(signer.address, chain);
 
-  const EASContractAddress = process.env.REACT_APP_EAS_CONTRACT_ADDRESS || '';
+  useEffect(() => {
+    refetch();
+  }, [chain, refetch]);
+
+  const EASContractAddress = process.env.REACT_APP_EAS_CONTRACT_ADDRESS || "";
   if (!EASContractAddress) {
-    throw new Error('EASContractAddress is not set');
+    throw new Error("EASContractAddress is not set");
   }
   const eas = new EAS(EASContractAddress);
   eas.connect(signer);
 
   if (!WORLD_VERIFIER_ADDRESS) {
-    throw new Error('WORLD_VERIFIER_ADDRESS is not set');
+    throw new Error("WORLD_VERIFIER_ADDRESS is not set");
   }
   const { data: verified } = useContractRead({
     address: WORLD_VERIFIER_ADDRESS as `0x{string}`,
     abi: WorldIdVerifier__factory.abi,
-    functionName: 'verifiedAddress',
+    functionName: "verifiedAddress",
     args: [signer.address as `0x{string}`],
   });
 
   const getAttestationSignature = async (chain: string, missionId: string) => {
     const backendUrl = process.env.REACT_APP_BACKEND_URL;
     if (!backendUrl) {
-      throw new Error('REACT_APP_BACKEND_URL is not set');
+      throw new Error("REACT_APP_BACKEND_URL is not set");
     }
     try {
       const response = await axios.post(`${backendUrl}/api/missionCheck`, {
@@ -72,23 +75,23 @@ function Missions({ signer }: { signer: JsonRpcSigner }) {
       });
 
       if (response.data.result) {
-        setModalTitle('Mission Check');
-        setModalMessage('Certificate already created or not eligible');
+        setModalTitle("Mission Check");
+        setModalMessage("Certificate already created or not eligible");
         setModalIsOpen(true);
         return;
       }
 
       if (!response.data.signature) {
-        setModalTitle('Mission Check');
-        setModalMessage('Certificate already created or not eligible');
+        setModalTitle("Mission Check");
+        setModalMessage("Certificate already created or not eligible");
         setModalIsOpen(true);
         return;
       }
 
       const { message, signature } = response.data as AttestationMessage;
       setIsAttesting(true); // Show attestation progress modal
-      setModalTitle('Attestation in Progress');
-      setModalMessage('Making attestation...');
+      setModalTitle("Attestation in Progress");
+      setModalMessage("Making attestation...");
 
       const transaction = await eas.attestByDelegation({
         schema: message.schema,
@@ -109,15 +112,15 @@ function Missions({ signer }: { signer: JsonRpcSigner }) {
       refetch();
       console.log(receipt);
       setIsAttesting(false); // Hide attestation progress modal
-      setModalTitle('Success');
-      setModalMessage('Attestation completed successfully');
+      setModalTitle("Success");
+      setModalMessage("Attestation completed successfully");
       setModalIsOpen(true);
     } catch (error) {
       setIsAttesting(false); // Hide attestation progress modal
-      setModalTitle('Error');
-      setModalMessage('Failed to verify the certificate');
+      setModalTitle("Error");
+      setModalMessage("Failed to verify the certificate");
       setModalIsOpen(true);
-      console.error('Failed to verify the certificate:', error);
+      console.error("Failed to verify the certificate:", error);
     }
   };
 
@@ -160,23 +163,23 @@ function Missions({ signer }: { signer: JsonRpcSigner }) {
                   href={
                     mission.uid
                       ? `https://optimism.easscan.org/attestation/view/${mission.uid}`
-                      : ''
+                      : ""
                   }
                 >
-                  {mission.uid ? 'View Attestation' : ''}
+                  {mission.uid ? "View Attestation" : ""}
                 </a>
               </div>
               <div className="mt-auto flex border-t border-gray-200 divide-x divide-gray-200">
                 <button
                   className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-es-xl rounded-ee-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
                   disabled={!mission.isActive || mission.completed || !verified}
-                  onClick={() => getAttestationSignature('optimism', mission.id)}
+                  onClick={() => getAttestationSignature(chain, mission.id)}
                 >
                   {!verified
-                    ? 'Verify Human with World ID first'
+                    ? "Verify Human with World ID first"
                     : !mission.completed
-                    ? 'Check condition & Claim'
-                    : 'Completed'}
+                    ? "Check condition & Claim"
+                    : "Completed"}
                 </button>
               </div>
             </div>

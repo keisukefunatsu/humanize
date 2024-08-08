@@ -10,16 +10,16 @@ export interface Mission {
   uid?: string;
 }
 
-const fetchMissions = async (walletAddress: string): Promise<Mission[]> => {
-  const url = `${process.env.REACT_APP_BACKEND_URL}/api/missions/${walletAddress}`;
+const fetchMissions = async (walletAddress: string, chain: string): Promise<Mission[]> => {
+  const url = `${process.env.REACT_APP_BACKEND_URL}/api/missions/${walletAddress}?chain=${chain}`;
   const response = await axios.get(url);
   return response.data;
 };
 
-const useGetMissions = (walletAddress: string) => {
+const useGetMissions = (walletAddress: string, chain: string) => {
   return useQuery({
     queryKey: ["missions", walletAddress],
-    queryFn: () => fetchMissions(walletAddress),
+    queryFn: () => fetchMissions(walletAddress, chain),
   });
 };
 

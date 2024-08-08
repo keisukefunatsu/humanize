@@ -25,13 +25,13 @@ Humanize sets a new standard for recognizing positive human activities in the bl
 ## Architecture
 
 - Architecture Diagram
-  
+
 ```mermaid
 graph TD
   subgraph Blockchain
     Wallet[Wallet]
-    subgraph Optimism                
-      VerifierContract[Verifier \n Contract]      
+    subgraph Optimism
+      VerifierContract[Verifier \n Contract]
         subgraph EAS
           EASContract[EASContract]
           Schema[Schema]
@@ -47,7 +47,7 @@ graph TD
   subgraph Blockscout
     Explorer[Explorer]
   end
- 
+
   subgraph WorldApp
     IncognitoAction[Incognito \n Action]
   end
@@ -57,7 +57,7 @@ graph TD
           MissionChecker[Mission \n Checker]
           MissionAttester[Mission \n Attester]
       end
-      
+
       subgraph Frontend
           User[User]
       end
@@ -78,8 +78,8 @@ graph TD
   MissionChecker --> |Retrieve attestations| EASGraphQL
 ```
 
-
 - Sequence Diagram
+
 ```mermaid
 sequenceDiagram
   participant User
@@ -98,4 +98,13 @@ sequenceDiagram
   User ->> EASContract: Onchain Attestation
   EASContract ->> EASContract: Check condition with Attestation Resolver
   EASContract ->> EASContract: Check schema with Schema
+```
+
+### EAS Schema
+
+- Simple Schema for mission
+
+```yaml
+missionId: string
+chainId: string
 ```

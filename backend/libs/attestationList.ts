@@ -84,6 +84,9 @@ export const fetchAttestations = async ({
       schemaId: {
         equals: schema,
       },
+      revoked: {
+        equals: false,
+      },
     },
     schemaWhere2: {
       id: schema,
@@ -91,14 +94,18 @@ export const fetchAttestations = async ({
   };
 
   try {
-    const response = await axios.post("https://optimism.easscan.org/graphql", {
-      query: GET_QUERY,
-      variables: variables,
-    }, {
-      headers: {
-        "Content-Type": "application/json",
+    const response = await axios.post(
+      "https://optimism.easscan.org/graphql",
+      {
+        query: GET_QUERY,
+        variables: variables,
       },
-    });
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("Fetched Attestations:", response.data.data);
     return response.data.data as GetAttestationsResponse;

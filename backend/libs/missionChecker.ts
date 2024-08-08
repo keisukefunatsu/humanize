@@ -14,12 +14,12 @@ const BLOCKSCOUT_CHAIN_SYMBOLS = {
   zksync: "zksync",
   sepolia: "eth-sepolia",
 };
-export type BlockScoutChain = keyof typeof BLOCKSCOUT_CHAIN_SYMBOLS;
+export type ChainName = keyof typeof BLOCKSCOUT_CHAIN_SYMBOLS;
 
 export class TransactionMissionChecker implements MissionChecker {
   private MISSION_ID = "transaction5";
   private TRANSACTION_COUNT_THRESHOLD = 5;
-  constructor(private chain: BlockScoutChain) {}
+  constructor(private chain: ChainName) {}
   async check(userAddress: AddressLike, schemaId: string): Promise<boolean> {
     const attestationData = await fetchAttestations({
       walletAddress: userAddress,
@@ -32,7 +32,7 @@ export class TransactionMissionChecker implements MissionChecker {
       return false;
     }
 
-    if (attestationData.attestations.length > 0) {
+    if (attestationData.attestations.length > 0 && attestationData.attestations.map(attestation => attestation.decodedDataJson).includes(this.chain)) {
       console.log("already attested.");
       return false;
     }
@@ -64,7 +64,7 @@ export class TransactionMissionChecker implements MissionChecker {
 export class GetERC721MissionChecker implements MissionChecker {
   private MISSION_ID = "getErc721";
   private TRANSACTION_THRESHOLD = 1;
-  constructor(private chain: BlockScoutChain) {}
+  constructor(private chain: ChainName) {}
   async check(userAddress: AddressLike, schemaId: string): Promise<boolean> {
     const attestationData = await fetchAttestations({
       walletAddress: userAddress,

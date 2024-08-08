@@ -4,7 +4,7 @@ import { env } from "hono/adapter";
 import { handle } from "hono/vercel";
 import { AddressLike, isAddress } from "ethers";
 import {
-  BlockScoutChain,
+  ChainName,
   GetERC721MissionChecker,
   TransactionMissionChecker,
 } from "../libs/missionChecker";
@@ -31,12 +31,17 @@ app.get("/", (c) => {
 app.get("/missions/:walletAddress", async (c) => {
   try {
     const { walletAddress }: { walletAddress: AddressLike } = c.req.param();
+    const chain = c.req.query("chain") as ChainName; // Extract chain directly and cast to ChainName
     if (!walletAddress || !isAddress(walletAddress)) {
       c.status(400);
       return c.json({ message: "walletAddress is required" });
     }
+    if (!chain) {
+      c.status(400);
+      return c.json({ message: "chain is required" });
+    }
     const missionList = new MissionList();
-    const missions = await missionList.all(walletAddress);
+    const missions = await missionList.all(walletAddress, chain);
     return c.json(missions);
   } catch (e) {
     console.error(e);
@@ -50,7 +55,7 @@ app.post("/missionCheck", async (c) => {
       walletAddress,
       missionId,
       chain,
-    }: { walletAddress: AddressLike; missionId: string; chain: BlockScoutChain } =
+    }: { walletAddress: AddressLike; missionId: string; chain: ChainName } =
       await c.req.json();
     let client: any;
     let result: boolean = false;
@@ -59,6 +64,7 @@ app.post("/missionCheck", async (c) => {
       return c.json({ message: "walletAddress is required" });
     }
     const { SCHEMA_ID } = env<{ SCHEMA_ID: string }>(c);
+  
     switch (missionId) {
       case "transaction5":
         client = new TransactionMissionChecker(chain);
@@ -80,16 +86,19 @@ app.post("/missionCheck", async (c) => {
       default:
         return c.json({ message: "Invalid missionId" });
     }
-
+    
     if (!result) {
+      c.status(400);
       return c.json({ message: "Not eligible" });
     }
     const verified = await checkWorldIdVerified(walletAddress);
     if (!verified) {
+      c.status(400);
       return c.json({ message: "Not verified" });
     }
     const signature = await getDelegatedAttestation({ walletAddress, missionId, chain });
     c.status(200);
+    console.log(signature);
     return c.json(signature);
   } catch (e) {
     c.status(500);

@@ -1,5 +1,6 @@
 import { AddressLike } from "ethers";
 import { DecodedDataItem, fetchAttestations } from "./attestationList";
+import { ChainName } from "./missionChecker";
 
 interface Mission {
   id: string;
@@ -10,20 +11,12 @@ interface Mission {
   uid?: string;
 }
 
-const BLOCKSCOUT_CHAIN_SYMBOLS = {
-  ethereum: "eth",
-  polygon: "polygon",
-  binance: "bsc",
-  optimism: "optimism",
-};
-
-export type BlockScoutChain = keyof typeof BLOCKSCOUT_CHAIN_SYMBOLS;
 
 // TODO: persist data in database
 export class MissionList {
   constructor() {}
-  async all(userAddress: AddressLike): Promise<Mission[]> {
-    const SCHEMA_ID = process.env.SCHEMA_ID || "";
+  async all(userAddress: AddressLike, chain: ChainName): Promise<Mission[]> {
+    const SCHEMA_ID = process.env.SCHEMA_ID || "";  
     if (!SCHEMA_ID) {
       throw new Error("SCHEMA_ID is not set");
     }
@@ -45,7 +38,7 @@ export class MissionList {
       },
       {
         id: "uniswapFirstSwap",
-        name: "First Swap at Uniswap(Currently Free)",
+        name: "First Swap at Uniswap(Free)",
         description: "Swap at least 1 token at Uniswap",
         isActive: true,
         completed: false,
@@ -53,14 +46,14 @@ export class MissionList {
       {
         // id: "governanceContributor",
         id: "governanceContributor",
-        name: "Governance Contributor(Currently Free)",
+        name: "Governance \n Contributor(Free)",
         description: "Vote at least 1 proposal on network governance",
         isActive: true,
         completed: false,
       },
       {
         id: "chainEcosystemContributor",
-        name: "Chain EcosystemContributor(Currently Free)",
+        name: "Chain Ecosystem \n Contributor(Free)",
         description: "At least 1 Github PR merged on Chain Ecosystem",
         isActive: true,
         completed: false,
@@ -84,10 +77,11 @@ export class MissionList {
       const decoded = decodeData.reduce((accm, item) => {
         return { ...accm, [item.value.name]: item.value.value };
       }, {}) as { missionId: string; chainId: string };
-      console.log("completed", decoded);
+      
       const mission = missions.find(
-        (mission) => mission.id === decoded.missionId
+        (mission) => mission.id === decoded.missionId && decoded.chainId === chain
       );
+      
       if (mission) {
         mission.completed = true;
         mission.uid = attestation.id;
