@@ -5,7 +5,7 @@ import Layout from "./layout";
 
 function Home() {
   const signer = useEthersSigner();
-  const [activeChain, setActiveChain] = useState("Optimism");
+  const [activeChain, setActiveChain] = useState("optimism");
 
   const handleChainChange = (chain: string) => {
     setActiveChain(chain);
@@ -18,7 +18,7 @@ function Home() {
       <div>
         <main>
           {signer ? (
-            <Missions signer={signer} chain={activeChain} />
+            <Missions signer={signer} chain={activeChain ?? "optimism"} />
           ) : (
             <div className="p-8 text-center text-gray-800 rounded-lg shadow-lg max-w-xl mx-auto my-10">
               <h1 className="text-3xl font-bold mb-4">Humanize</h1>

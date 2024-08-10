@@ -68,6 +68,9 @@ function Missions({ signer, chain }: { signer: JsonRpcSigner; chain: string }) {
       throw new Error("REACT_APP_BACKEND_URL is not set");
     }
     try {
+      setModalTitle("Mission Check");
+      setModalMessage("Checking mission condition...");
+      setModalIsOpen(true);
       const response = await axios.post(`${backendUrl}/api/missionCheck`, {
         walletAddress: signer.address,
         chain,
@@ -75,16 +78,12 @@ function Missions({ signer, chain }: { signer: JsonRpcSigner; chain: string }) {
       });
 
       if (response.data.result) {
-        setModalTitle("Mission Check");
-        setModalMessage("Certificate already created or not eligible");
-        setModalIsOpen(true);
+        setModalMessage("Attestation already created or not eligible");
         return;
       }
 
       if (!response.data.signature) {
-        setModalTitle("Mission Check");
-        setModalMessage("Certificate already created or not eligible");
-        setModalIsOpen(true);
+        setModalMessage("Attestation already created or not eligible");
         return;
       }
 
@@ -110,17 +109,19 @@ function Missions({ signer, chain }: { signer: JsonRpcSigner; chain: string }) {
       });
       const receipt = await transaction.wait();
       refetch();
-      console.log(receipt);
       setIsAttesting(false); // Hide attestation progress modal
       setModalTitle("Success");
       setModalMessage("Attestation completed successfully");
       setModalIsOpen(true);
-    } catch (error) {
-      setIsAttesting(false); // Hide attestation progress modal
+    } catch (error: any) {      
+      setIsAttesting(false); 
+      if (error.response?.status === 400) {
+        setModalMessage("Attestation already created or not eligible");
+        return
+      }
       setModalTitle("Error");
-      setModalMessage("Failed to verify the certificate");
-      setModalIsOpen(true);
-      console.error("Failed to verify the certificate:", error);
+      setModalMessage("Failed to verify the signature");
+      console.error("Failed to verify the signature:", error);
     }
   };
 

@@ -11,7 +11,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, onChainChange }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeChain, setActiveChain] = useState<string>("Optimism"); // Add this state
+  const [activeChain, setActiveChain] = useState<string>("optimism"); // Add this state
 
   const signer = useEthersSigner();
 
