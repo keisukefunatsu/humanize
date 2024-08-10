@@ -5,7 +5,9 @@ import { handle } from "hono/vercel";
 import { AddressLike, isAddress } from "ethers";
 import {
   ChainName,
-  GetERC721MissionChecker,
+  GasConsumerMissionChecker,
+  GetENSMissionChecker,
+  GetNftMissionChecker,
   TransactionMissionChecker,
 } from "../libs/missionChecker";
 import { MissionList } from "../libs/missionList";
@@ -64,21 +66,29 @@ app.post("/missionCheck", async (c) => {
       return c.json({ message: "walletAddress is required" });
     }
     const { SCHEMA_ID } = env<{ SCHEMA_ID: string }>(c);
-  
+
+    const verified = await checkWorldIdVerified(walletAddress);
+    if (!verified) {
+      c.status(400);
+      return c.json({ message: "Not verified" });
+    }
+
     switch (missionId) {
       case "transaction5":
         client = new TransactionMissionChecker(chain);
         result = await client.check(walletAddress, SCHEMA_ID);
         break;
-      case "getErc721":
-        client = new GetERC721MissionChecker(chain);
+      case "getNft":
+        client = new GetNftMissionChecker(chain);
         result = await client.check(walletAddress, SCHEMA_ID);
         break;
-      case "uniswapFirstSwap":
-        result = true;
+      case "ENSName":
+        client = new GetENSMissionChecker(chain);
+        result = await client.check(walletAddress, SCHEMA_ID);
         break;
-      case "governanceContributor":
-        result = true;
+      case "gasConsumer":
+        client = new GasConsumerMissionChecker(chain);
+        result = await client.check(walletAddress, SCHEMA_ID);
         break;
       case "chainEcosystemContributor":
         result = true;
@@ -91,14 +101,10 @@ app.post("/missionCheck", async (c) => {
       c.status(400);
       return c.json({ message: "Not eligible" });
     }
-    const verified = await checkWorldIdVerified(walletAddress);
-    if (!verified) {
-      c.status(400);
-      return c.json({ message: "Not verified" });
-    }
+
     const signature = await getDelegatedAttestation({ walletAddress, missionId, chain });
     c.status(200);
-    console.log(signature);
+    // console.log(signature);
     return c.json(signature);
   } catch (e) {
     c.status(500);
